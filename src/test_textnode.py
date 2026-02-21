@@ -1,6 +1,6 @@
 import unittest
 
-from textnode import TextNode, TextType, text_node_to_html_node
+from textnode import TextNode, TextType, text_node_to_html_node, split_nodes_delimiter
 
 
 class TestTextNode(unittest.TestCase):
@@ -43,5 +43,37 @@ class TestTextNode(unittest.TestCase):
         self.assertEqual(html_node.value, None)
         self.assertEqual(html_node.props["alt"], "Boots")
         self.assertEqual(html_node.props["src"], "https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp")
+
+    def test_split_nodes(self):
+        node = TextNode("This is text with a `code block` word", TextType.TEXT)
+        new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
+        self.assertEqual(new_nodes,[
+                TextNode("This is text with a ", TextType.TEXT),
+                TextNode("code block", TextType.CODE),
+                TextNode(" word", TextType.TEXT),
+            ])
+
+    def test_split_list(self):
+        nodes = [
+            TextNode("This is a text node with no blocks", TextType.TEXT),
+            TextNode("**This whole node is bold**", TextType.BOLD),
+            TextNode("This is text with a `code block` word", TextType.TEXT),
+            TextNode("This node has _italic words_", TextType.TEXT)
+        ]
+        split = split_nodes_delimiter(nodes, '`', TextType.CODE)
+        split = split_nodes_delimiter(split, "**", TextType.BOLD)
+        split = split_nodes_delimiter(split, "_", TextType.ITALIC)
+        self.assertEqual(split,
+                         [
+                            TextNode("This is a text node with no blocks", TextType.TEXT),
+                            TextNode("**This whole node is bold**", TextType.BOLD),
+                            TextNode("This is text with a ", TextType.TEXT),
+                            TextNode("code block", TextType.CODE),
+                            TextNode(" word", TextType.TEXT),
+                            TextNode("This node has ", TextType.TEXT),
+                            TextNode("italic words", TextType.ITALIC)
+                         ])
+    def test_empty(self):
+        self.assertEqual(split_nodes_delimiter([], '', TextType.BOLD),[])
 if __name__ == "__main__":
     unittest.main()

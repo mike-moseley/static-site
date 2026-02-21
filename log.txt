@@ -1,36 +1,34 @@
-.........F.F....
+...............E.....
 ======================================================================
-FAIL: test_to_html_with_children (test_htmlnode.TestHTMLNode.test_to_html_with_children)
+ERROR: test_split_nodes (test_textnode.TestTextNode.test_split_nodes)
 ----------------------------------------------------------------------
 Traceback (most recent call last):
-  File "/home/mike/boot.dev/static-site/src/test_htmlnode.py", line 54, in test_to_html_with_children
-    self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
-    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError: '<div></div>' != '<div><span>child</span></div>'
-- <div></div>
-+ <div><span>child</span></div>
-
-
-======================================================================
-FAIL: test_to_html_with_many_children (test_htmlnode.TestHTMLNode.test_to_html_with_many_children)
-----------------------------------------------------------------------
-Traceback (most recent call last):
-  File "/home/mike/boot.dev/static-site/src/test_htmlnode.py", line 72, in test_to_html_with_many_children
-    self.assertEqual(
-    ~~~~~~~~~~~~~~~~^
-        parent_node.to_html(),
-        ^^^^^^^^^^^^^^^^^^^^^^
-        '<div><span><b>grandchild</b></span><b>grandchild</b><img src="https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp" alt="Boots"></div>'
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    )
-    ^
-AssertionError: '<div[27 chars]pan></div><div><b>grandchild</b></div><div><im[81 chars]div>' != '<div[27 chars]pan><b>grandchild</b><img src="https://www.boo[59 chars]div>'
-- <div><span><b>grandchild</b></span></div><div><b>grandchild</b></div><div><img src="https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp" alt="Boots"></div>
-?                                     -----------                 -----------
-+ <div><span><b>grandchild</b></span><b>grandchild</b><img src="https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp" alt="Boots"></div>
-
+  File "/home/mike/boot.dev/static-site/src/test_textnode.py", line 49, in test_split_nodes
+    self.assertEqual(new_nodes,[
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^
+            TextNode("This is text with a ", TextType.TEXT),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            TextNode("code block", TextType.CODE),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            TextNode(" word", TextType.TEXT),
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        ])
+        ^^
+  File "/home/mike/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/case.py", line 907, in assertEqual
+    assertion_func(first, second, msg=msg)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mike/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/case.py", line 1113, in assertListEqual
+    self.assertSequenceEqual(list1, list2, msg, seq_type=list)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/mike/.local/share/uv/python/cpython-3.13.12-linux-x86_64-gnu/lib/python3.13/unittest/case.py", line 1060, in assertSequenceEqual
+    if item1 != item2:
+       ^^^^^^^^^^^^^^
+  File "/home/mike/boot.dev/static-site/src/textnode.py", line 21, in __eq__
+    text_bool = self.text == other.text
+                             ^^^^^^^^^^
+AttributeError: 'list' object has no attribute 'text'
 
 ----------------------------------------------------------------------
-Ran 16 tests in 0.001s
+Ran 21 tests in 0.001s
 
-FAILED (failures=2)
+FAILED (errors=1)
