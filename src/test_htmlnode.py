@@ -2,6 +2,7 @@ import unittest
 
 from htmlnode import HTMLNode
 from htmlnode import LeafNode
+from htmlnode import ParentNode
 
 class TestHTMLNode(unittest.TestCase):
     def test_eq(self):
@@ -46,3 +47,35 @@ class TestHTMLNode(unittest.TestCase):
     def test_leaf_to_html_img(self):
         node = LeafNode("img", "Boots", {"src": "https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp"})
         self.assertEqual(node.to_html(), '<img src="https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp" alt="Boots">')
+
+    def test_to_html_with_children(self):
+        child_node = LeafNode("span", "child")
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+
+    def test_to_html_with_grandchildren(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        child_node = ParentNode("span", [grandchild_node])
+        parent_node = ParentNode("div", [child_node])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<div><span><b>grandchild</b></span></div>",
+        )
+    def test_to_html_with_many_children(self):
+        grandchild_node = LeafNode("b", "grandchild")
+        sibling_nodes = [
+            ParentNode("span", [grandchild_node]),
+            grandchild_node,
+            LeafNode("img", "Boots", {"src": "https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp"})
+        ]
+        parent_node = ParentNode("div", sibling_nodes)
+        self.assertEqual(
+            parent_node.to_html(),
+            '<div><span><b>grandchild</b></span><b>grandchild</b><img src="https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp" alt="Boots"></div>'
+        )
+    def test_to_html_with_no_children(self):
+        parent_node = ParentNode("b", [LeafNode(None, "SINK")])
+        self.assertEqual(
+            parent_node.to_html(),
+            "<b>SINK</b>"
+        )

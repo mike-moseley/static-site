@@ -1,0 +1,36 @@
+.........F.F....
+======================================================================
+FAIL: test_to_html_with_children (test_htmlnode.TestHTMLNode.test_to_html_with_children)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/mike/boot.dev/static-site/src/test_htmlnode.py", line 54, in test_to_html_with_children
+    self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: '<div></div>' != '<div><span>child</span></div>'
+- <div></div>
++ <div><span>child</span></div>
+
+
+======================================================================
+FAIL: test_to_html_with_many_children (test_htmlnode.TestHTMLNode.test_to_html_with_many_children)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/home/mike/boot.dev/static-site/src/test_htmlnode.py", line 72, in test_to_html_with_many_children
+    self.assertEqual(
+    ~~~~~~~~~~~~~~~~^
+        parent_node.to_html(),
+        ^^^^^^^^^^^^^^^^^^^^^^
+        '<div><span><b>grandchild</b></span><b>grandchild</b><img src="https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp" alt="Boots"></div>'
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+AssertionError: '<div[27 chars]pan></div><div><b>grandchild</b></div><div><im[81 chars]div>' != '<div[27 chars]pan><b>grandchild</b><img src="https://www.boo[59 chars]div>'
+- <div><span><b>grandchild</b></span></div><div><b>grandchild</b></div><div><img src="https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp" alt="Boots"></div>
+?                                     -----------                 -----------
++ <div><span><b>grandchild</b></span><b>grandchild</b><img src="https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp" alt="Boots"></div>
+
+
+----------------------------------------------------------------------
+Ran 16 tests in 0.001s
+
+FAILED (failures=2)
