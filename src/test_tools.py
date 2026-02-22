@@ -1,6 +1,7 @@
 import unittest
 from textnode import TextNode,TextType
-from tools import text_node_to_html_node,split_nodes_delimiter,extract_markdown_images,extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks
+from tools import BlockType
+from tools import text_node_to_html_node,split_nodes_delimiter,extract_markdown_images,extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks, block_to_block_type
 
 class TestTextNode(unittest.TestCase):
     # Test text_node_to_html_node
@@ -321,6 +322,152 @@ This is the same paragraph on a new line
         expected = ["Where's", "my scooby snack?"]
         blocks = markdown_to_blocks(md)
         self.assertEqual(blocks, expected)
+
+    # Test block_to_block_type
+    def test_block_to_block_type_plain_valid(self):
+        md = "Just a normal paragraph"
+        expected = BlockType.PARAGRAPH
+
+        self.assertEqual(block_to_block_type(md), expected)
+
+    def test_block_to_block_type_heading_valid(self):
+        md = "### This is a Heading"
+        expected = BlockType.HEADING
+
+        self.assertEqual(block_to_block_type(md), expected)
+
+    def test_block_to_block_type_heading_invalid(self):
+        md = "- This is an unordered list"
+        expected = BlockType.HEADING
+
+        self.assertNotEqual(block_to_block_type(md), expected)
+
+    def test_block_to_block_type_heading_one(self):
+        md = "# This is a Heading"
+        expected = BlockType.HEADING
+
+        self.assertEqual(block_to_block_type(md), expected)
+
+    def test_block_to_block_type_heading_six(self):
+        md = "###### This is a Heading"
+        expected = BlockType.HEADING
+
+        self.assertEqual(block_to_block_type(md), expected)
+
+    def test_block_to_block_type_heading_seven(self):
+        md = "####### This is not a Heading"
+        expected = BlockType.HEADING
+
+        self.assertNotEqual(block_to_block_type(md), expected)
+
+    def test_block_to_block_type_heading_no_space(self):
+        md = "###This is a Heading"
+        expected = BlockType.HEADING
+
+        self.assertNotEqual(block_to_block_type(md), expected)
+
+    def test_block_to_block_type_code_valid(self):
+        md = """```
+This is a code block
+```"""
+        result = block_to_block_type(md)
+        expected = BlockType.CODE
+
+        self.assertEqual(result, expected)
+
+    def test_block_to_block_type_code_not_code(self):
+        md = "### This is a Heading"
+        result = block_to_block_type(md)
+        expected = BlockType.CODE
+
+        self.assertNotEqual(result, expected)
+
+    def test_block_to_block_type_code_no_nl(self):
+        md = """```This is a code block
+```"""
+        result = block_to_block_type(md)
+        expected = BlockType.CODE
+
+        self.assertNotEqual(result, expected)
+
+    def test_block_to_block_type_code_no_close(self):
+        md = """```This is a code block
+"""
+        result = block_to_block_type(md)
+        expected = BlockType.CODE
+
+        self.assertNotEqual(result, expected)
+
+    def test_block_to_block_type_quote(self):
+        md = "> This is a \n>valid\n> quote block"
+        result = block_to_block_type(md)
+        expected = BlockType.QUOTE
+
+        self.assertEqual(result, expected)
+
+    def test_block_to_block_type_quote_not_quote(self):
+        md = """```This is a code block
+```"""
+        result = block_to_block_type(md)
+        expected = BlockType.QUOTE
+
+        self.assertNotEqual(result, expected)
+
+    def test_block_to_block_type_quote_invalid(self):
+        md = "> This is a \n>valid\n\n> quote block"
+        result = block_to_block_type(md)
+        expected = BlockType.QUOTE
+
+        self.assertNotEqual(result, expected)
+
+    def test_block_to_block_type_ul(self):
+        md = "- Ding\n- Dong\n- An unordered list"
+        result = block_to_block_type(md)
+        expected = BlockType.UNORDERED_LIST
+
+        self.assertEqual(result, expected)
+
+    def test_block_to_block_type_ul_invalid(self):
+        md = "- Ding\n- Dong\n-- Not an unordered list"
+        result = block_to_block_type(md)
+        expected = BlockType.UNORDERED_LIST
+
+        self.assertNotEqual(result, expected)
+
+    def test_block_to_block_type_ol(self):
+        md = "1. Ding\n2. Dong\n3. An ordered list"
+        result = block_to_block_type(md)
+        expected = BlockType.ORDERED_LIST
+
+        self.assertEqual(result, expected)
+
+    def test_block_to_block_type_ol_0(self):
+        md = "0. Ding\n1. Dong\n2. An ordered list"
+        result = block_to_block_type(md)
+        expected = BlockType.ORDERED_LIST
+
+        self.assertNotEqual(result, expected)
+
+    def test_block_to_block_type_ol_2(self):
+        md = "2. Ding\n3. Dong\n4. An ordered list"
+        result = block_to_block_type(md)
+        expected = BlockType.ORDERED_LIST
+
+        self.assertNotEqual(result, expected)
+
+    def test_block_to_block_type_ol_skip(self):
+        md = "1. Ding\n3. Dong\n4. An ordered list"
+        result = block_to_block_type(md)
+        expected = BlockType.ORDERED_LIST
+
+        self.assertNotEqual(result, expected)
+
+    def test_block_to_block_type_ol_helper_test(self):
+        md = ""
+        result = block_to_block_type(md)
+        expected = BlockType.ORDERED_LIST
+
+        self.assertNotEqual(result, expected)
 
 if __name__ == "__main__":
     unittest.main()

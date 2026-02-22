@@ -1,6 +1,15 @@
+from enum import Enum
 from htmlnode import HTMLNode,LeafNode
 from textnode import TextType, TextNode
 import re
+
+class BlockType(Enum):
+    PARAGRAPH = "paragraph"
+    HEADING = "heading"
+    CODE = "code"
+    QUOTE = "quote"
+    UNORDERED_LIST = "unordered_list"
+    ORDERED_LIST = "ordered_list"
 
 def text_node_to_html_node(text_node):
     match text_node.text_type:
@@ -112,4 +121,49 @@ def markdown_to_blocks(markdown):
             continue
         new_blocks.append(stripped)
     return new_blocks
+
+def block_to_block_type(block):
+    if re.match(r"^#{1,6}\ ", block):
+        return BlockType.HEADING
+    elif re.match(r"^(?:`{3}\n).*\n?(?:`{3})$", block, re.DOTALL):
+        return BlockType.CODE
+    elif _block_to_block_quote_helper(block):
+        return BlockType.QUOTE
+    elif _block_to_block_ul_helper(block):
+        return BlockType.UNORDERED_LIST
+    elif _block_to_block_ol_helper(block):
+        return BlockType.ORDERED_LIST
+    else:
+        return BlockType.PARAGRAPH
+
+def _block_to_block_quote_helper(block):
+    split = block.split('\n')
+    for b in split:
+        if b.startswith('>'):
+            continue
+        else:
+            return False
+    return True
+
+def _block_to_block_ul_helper(block):
+    split = block.split('\n')
+    for b in split:
+        if b.startswith(f'- '):
+            continue
+        else:
+            return False
+    return True
+
+
+def _block_to_block_ol_helper(block):
+    split = block.split('\n')
+    i = 0
+    for b in split:
+        i += 1
+        if b.startswith(f'{i}. '):
+            continue
+        else:
+            return False
+    return True
+
 
