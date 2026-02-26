@@ -1,3 +1,6 @@
+# Thanks Boots
+VOID_TAGS = {"img", "link"}
+
 class HTMLNode:
     def __init__(self, tag=None, value=None, children=None, props=None):
         self.tag = tag
@@ -32,14 +35,14 @@ class LeafNode(HTMLNode):
         super().__init__(tag, value, None, props)
 
     def to_html(self):
-        if self.value is None:
+        if self.value is None and self.tag not in VOID_TAGS:
             raise ValueError("Leaf nodes must have a value.")
         if self.tag is None:
             return self.value
         string = ""
         match self.tag:
             case "p" | "b" | "i" | "div" | "span" |\
-                "h1" | "h2" | "h3":
+                "h1" | "h2" | "h3" | "h4" | "h5" | "h6":
                 string = f'<{self.tag}>{self.value}</{self.tag}>'
             case "a":
                 href = ""
@@ -51,6 +54,18 @@ class LeafNode(HTMLNode):
                 if self.props is not None:
                     src = self.props["src"]
                 string = f'<{self.tag} src="{src}" alt="{self.value}">'
+            case "code":
+                string = f'<{self.tag}>{self.value}</{self.tag}>'
+            case "pre":
+                string = f'<{self.tag}><code>{self.value}</code></{self.tag}>'
+            case "ul", "ol":
+                lines = self.value.split('\n')
+                string = f'{self.tag}'
+                for l in lines:
+                    l_rep = l.replace('- ', '', 1)
+                    string += f"<li>{l_rep}<\li>"
+                string += f'/{self.tag}'
+
         return string
 
     def __repr__(self):

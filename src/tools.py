@@ -1,5 +1,5 @@
 from enum import Enum
-from htmlnode import HTMLNode,LeafNode
+from htmlnode import HTMLNode,LeafNode, ParentNode
 from textnode import TextType, TextNode
 import re
 
@@ -166,4 +166,90 @@ def _block_to_block_ol_helper(block):
             return False
     return True
 
+def _count_heading_level(block):
+    count = 0
+    for b in block:
+        if b == '#':
+            count += 1
+    return count
+
+def markdown_to_html_node(markdown):
+    blocks = markdown_to_blocks(markdown)
+    html_list = []
+    for b in blocks:
+        tag = ""
+        block_type = block_to_block_type(b)
+        match block_type:
+            case BlockType.HEADING:
+                level = _count_heading_level(b)
+                tag = f"h{level}"
+                md_tag = '#'*level + ' '
+                clean_string = b.replace(md_tag, '')
+                children = _text_to_children(clean_string)
+                html_list.append(LeafNode(tag, children))
+            case BlockType.PARAGRAPH:
+                tag = 'p'
+                clean_string = _md_to_html_paragraph_helper(b)
+                children = _text_to_children(clean_string)
+                html_list.append(ParentNode(tag, children))
+            case BlockType.QUOTE:
+                tag = "blockquote"
+                clean_string = _md_to_html_quote_helper(b)
+                children = _text_to_children(clean_string)
+                html_list.append(ParentNode(tag, children))
+            case BlockType.CODE:
+                tag = "pre"
+                string = b[4:-4]
+                lines = string.split('\n')
+                clean_lines = []
+                for l in lines:
+                    clean_lines.append(l.strip())
+                clean_string = "\n".join(clean_lines)
+                html_list.append(LeafNode(tag, clean_string))
+            case BlockType.UNORDERED_LIST:
+                tag = "ul"
+                clean_string = _md_to_html_list_helper(b)
+                children = _text_to_children(clean_string)
+                html_list.append(ParentNode(tag, children))
+            case BlockType.ORDERED_LIST:
+                tag = "ol"
+                clean_string = _md_to_html_list_helper(b)
+                children = _text_to_children(clean_string)
+                html_list.append(ParentNode(tag, children))
+    return ParentNode("div",html_list)
+
+
+
+def _text_to_children(text):
+    nodes = text_to_textnodes(text)
+    children_list = []
+    for n in nodes:
+        children_list.append(text_node_to_html_node(n))
+    return children_list
+
+def _md_to_html_quote_helper(text):
+    lines = text.split('\n')
+    clean_lines = []
+    for l in lines:
+        l = l.lstrip()
+        if l.startswith('>'):
+            l = l[1:]
+            if l.startswith(' '):
+                l = l[1:]
+        clean_lines.append(l)
+    return "\n".join(clean_lines).strip()
+
+def _md_to_html_paragraph_helper(text):
+    lines = text.splitlines()
+    for l in lines:
+        l = l.strip()
+    return ' '.join(lines)
+
+def _md_to_html_list_helper(text):
+    lines = text.split('\n')
+    string =""
+    for l in lines:
+        l = l[2:]
+        string += f"<li>{l}</li>"
+    return string
 

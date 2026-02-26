@@ -1,15 +1,13 @@
 import textnode
-from textnode import TextNode, TextType, split_nodes_delimiter
-
+from textnode import TextNode, TextType
+from tools import markdown_to_html_node
 
 
 def main():
-    node = TextNode("blabber", textnode.TextType.CODE)
-    print(node)
-    node = TextNode("This is text with a `code block` word", TextType.TEXT)
-    new_nodes = split_nodes_delimiter([node], "`", TextType.CODE)
-    print(new_nodes)
-    print(split_nodes_delimiter([], "", TextType.BOLD))
-
+    f = open("boots.md")
+    md = f.read()
+    node = markdown_to_html_node(md)
+    print(f"{node.to_html()}\n")
+    f.close()
 
 main()
