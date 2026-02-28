@@ -42,7 +42,8 @@ class LeafNode(HTMLNode):
         string = ""
         match self.tag:
             case "p" | "b" | "i" | "div" | "span" |\
-                "h1" | "h2" | "h3" | "h4" | "h5" | "h6":
+                "h1" | "h2" | "h3" | "h4" | "h5" | "h6"\
+                "li":
                 string = f'<{self.tag}>{self.value}</{self.tag}>'
             case "a":
                 href = ""
@@ -58,6 +59,7 @@ class LeafNode(HTMLNode):
                 string = f'<{self.tag}>{self.value}</{self.tag}>'
             case "pre":
                 string = f'<{self.tag}><code>{self.value}</code></{self.tag}>'
+            # TODO: remove lines logic, implementing li to take care of this
             case "ul", "ol":
                 lines = self.value.split('\n')
                 string = f'{self.tag}'
@@ -65,7 +67,6 @@ class LeafNode(HTMLNode):
                     l_rep = l.replace('- ', '', 1)
                     string += f"<li>{l_rep}<\li>"
                 string += f'/{self.tag}'
-
         return string
 
     def __repr__(self):

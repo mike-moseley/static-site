@@ -414,7 +414,7 @@ This is a code block
         self.assertNotEqual(result, expected)
 
     def test_block_to_block_type_quote_invalid(self):
-        md = "> This is a \n>valid\n\n> quote block"
+        md = "> This is a quote\nThis is not"
         result = block_to_block_type(md)
         expected = BlockType.QUOTE
 

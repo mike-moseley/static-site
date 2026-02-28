@@ -112,14 +112,36 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
     return nodes
 
+# TODO: Special case blocks
 def markdown_to_blocks(markdown):
     new_blocks = []
     blocks = markdown.split('\n\n')
     for b in blocks:
-        stripped = b.strip('\n').strip()
-        if stripped == '' or stripped == "":
-            continue
-        new_blocks.append(stripped)
+        block_type = block_to_block_type(b)
+        match block_type:
+            case BlockType.QUOTE:
+                quote_lines = []
+                lines = b.splitlines()
+                i = 0
+                while(i<len(lines) and lines[i].lstrip().startswith('>')):
+                    quote_lines.append(lines[i]);
+                    i += 1
+                new_blocks.append('\n'.join(quote_lines).strip())
+                remainder = '\n'.join(lines[i:]).strip()
+                if remainder:
+                    new_blocks.append(remainder)
+
+
+            # case BlockType.UNORDERED_LIST:
+            #
+            # case BlockType.ORDERED_LIST:
+            #
+            case _:
+                stripped = b.strip('\n').strip()
+                if not stripped:
+                    continue
+
+                new_blocks.append(stripped)
     return new_blocks
 
 def block_to_block_type(block):
@@ -137,18 +159,21 @@ def block_to_block_type(block):
         return BlockType.PARAGRAPH
 
 def _block_to_block_quote_helper(block):
-    split = block.split('\n')
+    is_quote = False
+    split = block.splitlines()
     for b in split:
-        if b.startswith('>'):
-            continue
+        if not b.strip(): continue
+        if b.lstrip().startswith('>'):
+            is_quote = True
         else:
             return False
-    return True
+    return is_quote
 
 def _block_to_block_ul_helper(block):
-    split = block.split('\n')
+    split = block.splitlines()
     for b in split:
-        if b.startswith(f'- '):
+        if not b.strip(): continue
+        if b.lstrip().startswith(f'- '):
             continue
         else:
             return False
@@ -156,7 +181,7 @@ def _block_to_block_ul_helper(block):
 
 
 def _block_to_block_ol_helper(block):
-    split = block.split('\n')
+    split = block.splitlines()
     i = 0
     for b in split:
         i += 1
@@ -168,9 +193,8 @@ def _block_to_block_ol_helper(block):
 
 def _count_heading_level(block):
     count = 0
-    for b in block:
-        if b == '#':
-            count += 1
+    while count < len(block) and block[count] == "#":
+        count += 1
     return count
 
 def markdown_to_html_node(markdown):
@@ -184,9 +208,9 @@ def markdown_to_html_node(markdown):
                 level = _count_heading_level(b)
                 tag = f"h{level}"
                 md_tag = '#'*level + ' '
-                clean_string = b.replace(md_tag, '')
+                clean_string = b[level:].lstrip()
                 children = _text_to_children(clean_string)
-                html_list.append(LeafNode(tag, children))
+                html_list.append(ParentNode(tag, children))
             case BlockType.PARAGRAPH:
                 tag = 'p'
                 clean_string = _md_to_html_paragraph_helper(b)
@@ -200,7 +224,7 @@ def markdown_to_html_node(markdown):
             case BlockType.CODE:
                 tag = "pre"
                 string = b[4:-4]
-                lines = string.split('\n')
+                lines = string.splitlines()
                 clean_lines = []
                 for l in lines:
                     clean_lines.append(l.strip())
@@ -208,14 +232,13 @@ def markdown_to_html_node(markdown):
                 html_list.append(LeafNode(tag, clean_string))
             case BlockType.UNORDERED_LIST:
                 tag = "ul"
-                clean_string = _md_to_html_list_helper(b)
-                children = _text_to_children(clean_string)
+                children = _md_to_html_ul_helper(b)
                 html_list.append(ParentNode(tag, children))
-            case BlockType.ORDERED_LIST:
-                tag = "ol"
-                clean_string = _md_to_html_list_helper(b)
-                children = _text_to_children(clean_string)
-                html_list.append(ParentNode(tag, children))
+            # case BlockType.ORDERED_LIST:
+            #     tag = "ol"
+            #     clean_string = _md_to_html_list_helper(b)
+            #     children = _text_to_children(clean_string)
+            #     html_list.append(ParentNode(tag, children))
     return ParentNode("div",html_list)
 
 
@@ -228,7 +251,7 @@ def _text_to_children(text):
     return children_list
 
 def _md_to_html_quote_helper(text):
-    lines = text.split('\n')
+    lines = text.splitlines()
     clean_lines = []
     for l in lines:
         l = l.lstrip()
@@ -245,11 +268,12 @@ def _md_to_html_paragraph_helper(text):
         l = l.strip()
     return ' '.join(lines)
 
-def _md_to_html_list_helper(text):
-    lines = text.split('\n')
-    string =""
+def _md_to_html_ul_helper(text):
+    lines = text.splitlines()
+    li_nodes = []
     for l in lines:
-        l = l[2:]
-        string += f"<li>{l}</li>"
-    return string
+        if not l.strip(): continue
+        l = l.lstrip()
+        li_nodes.append(ParentNode("li", _text_to_children(l[2:])))
+    return li_nodes
 
