@@ -43,7 +43,7 @@ class TestHTMLNode(unittest.TestCase):
         self.assertEqual(node.to_html(), '<a href="https://www.boot.dev">Click me!</a>')
 
     def test_leaf_to_html_img(self):
-        node = LeafNode("img", "Boots", {"src": "https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp"})
+        node = LeafNode("img", None, {"src": "https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp", "alt": "Boots"})
         self.assertEqual(node.to_html(), '<img src="https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp" alt="Boots">')
 
     def test_to_html_with_children(self):
@@ -64,7 +64,7 @@ class TestHTMLNode(unittest.TestCase):
         sibling_nodes = [
             ParentNode("span", [grandchild_node]),
             grandchild_node,
-            LeafNode("img", "Boots", {"src": "https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp"})
+            LeafNode("img", None, {"src": "https://www.boot.dev/_nuxt/new_boots_profile.DriFHGho.webp", "alt": "Boots"})
         ]
         parent_node = ParentNode("div", sibling_nodes)
         self.assertEqual(

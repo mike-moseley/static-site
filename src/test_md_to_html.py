@@ -34,6 +34,11 @@ This is another paragraph with _italic_ text and `code` here
             html,
             "<div><pre><code>    This is text that _should_ remain\n    the **same** even with inline stuff\n</code></pre></div>",
         )
+    def test_codeblock_code_tag(self):
+        md = "```\nYadda Yadda\n```"
+        html = markdown_to_html_node(md).to_html()
+        unexpected = "<div><pre>Yadda Yadda</pre></div"
+        self.assertNotEqual(html,unexpected)
 
     # Quote block
     def test_quoteblock_single(self):
@@ -84,6 +89,15 @@ This is another paragraph with _italic_ text and `code` here
         html = markdown_to_html_node(md).to_html()
         expected = "<div><ol><li>one</li><li>two</li><li>three</li></ol></div>"
         self.assertEqual(html, expected)
+    # Full test
+    def test_all(self):
+        self.maxDiff = None
+        f = open("boots.md")
+        md = f.read()
+        f.close()
+        html = markdown_to_html_node(md).to_html()
+        expected = '<div><h1>Main Heading</h1><p>This is a regular paragraph with <b>bold text</b> and <i>italic text</i> mixed in. It also has <code>inline code</code> and a <a href="https://boot.dev">link to Boot.dev</a>.</p><h2>Subheading</h2><blockquote>This is a quote block with <b>bold</b> inside\nIt spans multiple lines with <i>italics</i> too\nEach line starts with ></blockquote><p>Here\'s another paragraph with an <img src="https://example.com/image.png" alt="image alt text"> embedded in it.</p><ul><li>Item one with <b>bold</b></li><li>Item two with <i>italics</i></li><li>Item three with <code>code</code></li></ul><ol><li>First ordered item with a <a href="https://example.com">link</a></li><li>Second ordered item with <b>bold</b> and <i>italic</i></li><li>Third ordered item</li></ol></div>'
+        self.assertEqual(html,expected)
 
 if __name__ == "__main__":
     unittest.main()

@@ -51,20 +51,10 @@ class LeafNode(HTMLNode):
                     href = self.props["href"]
                 string = f'<{self.tag} href="{href}">{self.value}</{self.tag}>'
             case "img":
-                src = ""
                 if self.props is not None:
-                    src = self.props["src"]
-                string = f'<{self.tag} src="{src}" alt="{self.value}">'
-            # case "pre":
-            #     string = f'<{self.tag}><code>{self.value}</code></{self.tag}>'
-            # # TODO: remove lines logic, implementing li to take care of this
-            # case "ul", "ol":
-            #     lines = self.value.split('\n')
-            #     string = f'{self.tag}'
-            #     for l in lines:
-            #         l_rep = l.replace('- ', '', 1)
-            #         string += f"<li>{l_rep}<\li>"
-            #     string += f'/{self.tag}'
+                    src = self.props.get("src") if self.props else ""
+                    alt = self.props.get("alt") if self.props else ""
+                string = f'<{self.tag} src="{src}" alt="{alt}">'
         return string
 
     def __repr__(self):
