@@ -127,7 +127,7 @@ def markdown_to_blocks(markdown):
         elif (lines[0].strip().startswith("- ")):
             match = r"(?:^- )"
         elif (re.match(r"^\d+\.",lines[0].strip())):
-            match = r"^\d+\.\s"
+            match = r"(?:^\d+\.\s)"
         else:
             new_blocks.append(b)
             continue
@@ -221,23 +221,17 @@ def markdown_to_html_node(markdown):
                 children = _text_to_children(clean_string)
                 html_list.append(ParentNode(tag, children))
             case BlockType.CODE:
-                tag = "pre"
-                string = b[4:-4]
-                lines = string.splitlines()
-                clean_lines = []
-                for l in lines:
-                    clean_lines.append(l.strip())
-                clean_string = "\n".join(clean_lines)
-                html_list.append(LeafNode(tag, clean_string))
+                lines = b.splitlines()
+                clean_lines = '\n'.join(lines[1:-1]) + '\n'
+                html_list.append(ParentNode("pre", [LeafNode("code", clean_lines)]))
             case BlockType.UNORDERED_LIST:
                 tag = "ul"
                 children = _md_to_html_ul_helper(b)
                 html_list.append(ParentNode(tag, children))
-            # case BlockType.ORDERED_LIST:
-            #     tag = "ol"
-            #     clean_string = _md_to_html_list_helper(b)
-            #     children = _text_to_children(clean_string)
-            #     html_list.append(ParentNode(tag, children))
+            case BlockType.ORDERED_LIST:
+                tag = "ol"
+                children = _md_to_html_ol_helper(b)
+                html_list.append(ParentNode(tag, children))
     return ParentNode("div",html_list)
 
 
@@ -272,7 +266,20 @@ def _md_to_html_ul_helper(text):
     li_nodes = []
     for l in lines:
         if not l.strip(): continue
+        if not l.startswith("- "):
+            raise ValueError("_md_to_html_ul_helper: Not an unordered list!")
         l = l.lstrip()
         li_nodes.append(ParentNode("li", _text_to_children(l[2:])))
     return li_nodes
 
+def _md_to_html_ol_helper(text):
+    lines = text.splitlines()
+    li_nodes = []
+    for l in lines:
+        if not l.strip(): continue
+        l = l.lstrip()
+        if not re.match(r"(?:^\d+\.\s)",l):
+            raise ValueError("_md_to_html_ol_helper: Not an ordered list!")
+        l = re.sub(r"(?:^\d+\.\s)",'',l, count=1)
+        li_nodes.append(ParentNode("li", _text_to_children(l)))
+    return li_nodes

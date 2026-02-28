@@ -32,7 +32,7 @@ This is another paragraph with _italic_ text and `code` here
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+            "<div><pre><code>    This is text that _should_ remain\n    the **same** even with inline stuff\n</code></pre></div>",
         )
 
     # Quote block
@@ -78,7 +78,12 @@ This is another paragraph with _italic_ text and `code` here
 """
         html = markdown_to_html_node(md).to_html()
         self.assertEqual(html, "<div><ul><li>This is an</li><li>Unordered list</li></ul><p>-This line shouldn't count</p></div>")
+    # Ordered list
+    def test_ordered_list(self):
+        md = "1. one\n2. two\n3. three"
+        html = markdown_to_html_node(md).to_html()
+        expected = "<div><ol><li>one</li><li>two</li><li>three</li></ol></div>"
+        self.assertEqual(html, expected)
 
-        # self.assertEqual(html, "<div></div>")
 if __name__ == "__main__":
     unittest.main()

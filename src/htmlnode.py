@@ -43,7 +43,7 @@ class LeafNode(HTMLNode):
         match self.tag:
             case "p" | "b" | "i" | "div" | "span" |\
                 "h1" | "h2" | "h3" | "h4" | "h5" | "h6"\
-                "li":
+                "li" | "code" | "pre":
                 string = f'<{self.tag}>{self.value}</{self.tag}>'
             case "a":
                 href = ""
@@ -55,18 +55,16 @@ class LeafNode(HTMLNode):
                 if self.props is not None:
                     src = self.props["src"]
                 string = f'<{self.tag} src="{src}" alt="{self.value}">'
-            case "code":
-                string = f'<{self.tag}>{self.value}</{self.tag}>'
-            case "pre":
-                string = f'<{self.tag}><code>{self.value}</code></{self.tag}>'
-            # TODO: remove lines logic, implementing li to take care of this
-            case "ul", "ol":
-                lines = self.value.split('\n')
-                string = f'{self.tag}'
-                for l in lines:
-                    l_rep = l.replace('- ', '', 1)
-                    string += f"<li>{l_rep}<\li>"
-                string += f'/{self.tag}'
+            # case "pre":
+            #     string = f'<{self.tag}><code>{self.value}</code></{self.tag}>'
+            # # TODO: remove lines logic, implementing li to take care of this
+            # case "ul", "ol":
+            #     lines = self.value.split('\n')
+            #     string = f'{self.tag}'
+            #     for l in lines:
+            #         l_rep = l.replace('- ', '', 1)
+            #         string += f"<li>{l_rep}<\li>"
+            #     string += f'/{self.tag}'
         return string
 
     def __repr__(self):
