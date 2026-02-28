@@ -77,7 +77,7 @@ This is another paragraph with _italic_ text and `code` here
  -This line shouldn't count
 """
         html = markdown_to_html_node(md).to_html()
-        self.assertEqual(html, "<div><ul><li>This is an</li><li>Unordered list</li></ul><p>This line shouldn't count</p></div>")
+        self.assertEqual(html, "<div><ul><li>This is an</li><li>Unordered list</li></ul><p>-This line shouldn't count</p></div>")
 
         # self.assertEqual(html, "<div></div>")
 if __name__ == "__main__":

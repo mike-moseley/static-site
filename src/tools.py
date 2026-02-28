@@ -112,36 +112,33 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
     return nodes
 
-# TODO: Special case blocks
 def markdown_to_blocks(markdown):
     new_blocks = []
     blocks = markdown.split('\n\n')
     for b in blocks:
-        block_type = block_to_block_type(b)
-        match block_type:
-            case BlockType.QUOTE:
-                quote_lines = []
-                lines = b.splitlines()
-                i = 0
-                while(i<len(lines) and lines[i].lstrip().startswith('>')):
-                    quote_lines.append(lines[i]);
-                    i += 1
-                new_blocks.append('\n'.join(quote_lines).strip())
-                remainder = '\n'.join(lines[i:]).strip()
-                if remainder:
-                    new_blocks.append(remainder)
+        b = b.strip()
+        if not b:
+            continue
+        matched_lines = []
+        lines = b.splitlines()
+        i = 0
+        if (lines[0]).strip().startswith('>'):
+            match = r"(?:^>)"
+        elif (lines[0].strip().startswith("- ")):
+            match = r"(?:^- )"
+        elif (re.match(r"^\d+\.",lines[0].strip())):
+            match = r"^\d+\.\s"
+        else:
+            new_blocks.append(b)
+            continue
 
-
-            # case BlockType.UNORDERED_LIST:
-            #
-            # case BlockType.ORDERED_LIST:
-            #
-            case _:
-                stripped = b.strip('\n').strip()
-                if not stripped:
-                    continue
-
-                new_blocks.append(stripped)
+        while(i<len(lines) and re.match(match,lines[i].lstrip())):
+            matched_lines.append(lines[i])
+            i += 1
+        new_blocks.append('\n'.join(matched_lines).strip())
+        remainder = '\n'.join(lines[i:]).strip()
+        if remainder:
+            new_blocks.extend(markdown_to_blocks(remainder))
     return new_blocks
 
 def block_to_block_type(block):
@@ -170,26 +167,28 @@ def _block_to_block_quote_helper(block):
     return is_quote
 
 def _block_to_block_ul_helper(block):
+    is_ul = False
     split = block.splitlines()
     for b in split:
         if not b.strip(): continue
         if b.lstrip().startswith(f'- '):
-            continue
+            is_ul = True
         else:
             return False
-    return True
+    return is_ul
 
 
 def _block_to_block_ol_helper(block):
+    is_ol = False
     split = block.splitlines()
     i = 0
     for b in split:
         i += 1
         if b.startswith(f'{i}. '):
-            continue
+            is_ol = True
         else:
             return False
-    return True
+    return is_ol
 
 def _count_heading_level(block):
     count = 0
