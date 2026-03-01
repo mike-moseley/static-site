@@ -1,7 +1,7 @@
 import unittest
 from textnode import TextNode,TextType
 from tools import BlockType
-from tools import text_node_to_html_node,split_nodes_delimiter,extract_markdown_images,extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks, block_to_block_type
+from tools import text_node_to_html_node,split_nodes_delimiter,extract_markdown_images,extract_markdown_links, split_nodes_image, split_nodes_link, text_to_textnodes, markdown_to_blocks, block_to_block_type, extract_title
 
 class TestTextNode(unittest.TestCase):
     # Test text_node_to_html_node
@@ -468,6 +468,17 @@ This is a code block
         expected = BlockType.ORDERED_LIST
 
         self.assertNotEqual(result, expected)
+
+    def test_extract_title_heading_raises(self):
+        with self.assertRaisesRegex(Exception, r"No h1 header found"):
+            extract_title("### This is a Heading")
+
+    def test_extract_title_heading(self):
+        md = "# This is a Heading"
+        result = extract_title(md)
+        expected = "This is a Heading"
+
+        self.assertEqual(result, expected)
 
 if __name__ == "__main__":
     unittest.main()

@@ -2,6 +2,8 @@ from enum import Enum
 from htmlnode import HTMLNode,LeafNode, ParentNode
 from textnode import TextType, TextNode
 import re
+import os
+import shutil
 
 class BlockType(Enum):
     PARAGRAPH = "paragraph"
@@ -283,3 +285,73 @@ def _md_to_html_ol_helper(text):
         l = re.sub(r"(?:^\d+\.\s)",'',l, count=1)
         li_nodes.append(ParentNode("li", _text_to_children(l)))
     return li_nodes
+
+def extract_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    is_heading_one = False
+
+    i = 0
+    for b in blocks:
+        while(not is_heading_one and i != len(blocks)):
+            block_type = block_to_block_type(b)
+            if (block_type == BlockType.HEADING):
+                heading_level = _count_heading_level(b)
+                if (heading_level == 1):
+                    is_heading_one = True
+            i += 1
+        if (is_heading_one):
+            b = b.lstrip()
+            b = b[2:]
+            b = b.strip()
+            return b
+        raise Exception("No h1 header found")
+
+def generate_page(from_path, template_path, dest_path):
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+    md_f = open(from_path)
+    template_f = open(template_path)
+    markdown = md_f.read()
+    template = template_f.read()
+    md_f.close()
+    template_f.close()
+
+    html = markdown_to_html_node(markdown).to_html()
+    title = extract_title(markdown)
+
+    template = template.replace("{{ Title }}", title)
+    template = template.replace("{{ Content }}", html)
+
+    content_dir = os.path.dirname(dest_path)
+    from_dir = os.path.dirname(from_path)
+    os.makedirs(content_dir, exist_ok=True)
+    f = open(dest_path,"w")
+    f.write(template)
+    f.close()
+
+def generate_dir(source_dir,dest_dir):
+    if not os.path.exists(source_dir):
+        raise Exception("Source directory does not exist")
+    for f in os.listdir(source_dir):
+        f_path = os.path.join(source_dir,f)
+        if os.path.isfile(f_path):
+            print(f"File: {f} in {source_dir}")
+            shutil.copy(f_path,dest_dir)
+        elif os.path.isdir(f_path):
+            new_dest = os.path.join(dest_dir,f)
+            print(f"Directory: {f} in {source_dir}")
+            os.mkdir(new_dest)
+            generate_dir(f_path,new_dest)
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    if not os.path.exists(dir_path_content):
+        raise Exception("Content directory does not exist")
+    for f in os.listdir(dir_path_content):
+        f_source_path = os.path.join(dir_path_content,f)
+        f_dest_path = os.path.join(dest_dir_path, f)
+        if os.path.isfile(f_source_path) and f_source_path.endswith(".md"):
+            f_dest_path = f_dest_path.replace(".md", ".html")
+            generate_page(f_source_path, template_path, f_dest_path)
+        elif os.path.isdir(f_source_path):
+            os.makedirs(f_dest_path, exist_ok=True)
+            generate_pages_recursive(f_source_path,template_path,f_dest_path)
+
