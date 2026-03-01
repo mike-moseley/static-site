@@ -7,7 +7,16 @@ import sys
 
 
 def main():
-    base_path = sys.argv[1]
+    if (len(sys.argv) > 1):
+        base_path = sys.argv[1]
+    else:
+        base_path = '/'
+
+    if not base_path.startswith('/'):
+        base_path = '/'+base_path
+    if not base_path.endswith('/'):
+        base_path = '/'+base_path
+
     if os.path.exists("docs/"):
         shutil.rmtree("docs/")
     os.mkdir("docs/")

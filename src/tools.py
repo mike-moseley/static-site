@@ -333,6 +333,7 @@ def generate_page(from_path, template_path, dest_path,base_path):
 def generate_dir(source_dir,dest_dir):
     if not os.path.exists(source_dir):
         raise Exception("Source directory does not exist")
+    os.makedirs(dest_dir, exist_ok=True)
     for f in os.listdir(source_dir):
         f_path = os.path.join(source_dir,f)
         if os.path.isfile(f_path):
@@ -345,7 +346,6 @@ def generate_dir(source_dir,dest_dir):
             generate_dir(f_path,new_dest)
 
 def generate_pages_recursive(dir_path_content, template_path, dest_dir_path,base_path):
-    full_dest_dir_path = os.path.join(base_path, dest_dir_path)
     if not os.path.exists(dir_path_content):
         raise Exception("Content directory does not exist")
     for f in os.listdir(dir_path_content):
@@ -356,5 +356,5 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path,base
             generate_page(f_source_path, template_path, f_dest_path, base_path)
         elif os.path.isdir(f_source_path):
             os.makedirs(f_dest_path, exist_ok=True)
-            generate_pages_recursive(f_source_path,template_path,f_dest_path,full_dest_dir_path)
+            generate_pages_recursive(f_source_path,template_path,f_dest_path,base_path)
 
