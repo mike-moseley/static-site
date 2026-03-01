@@ -320,6 +320,8 @@ def generate_page(from_path, template_path, dest_path):
 
     template = template.replace("{{ Title }}", title)
     template = template.replace("{{ Content }}", html)
+    template = template.replace('href="/', 'href="{basepath}')
+    template = template.replace('src="/', 'src="{basepath}')
 
     content_dir = os.path.dirname(dest_path)
     from_dir = os.path.dirname(from_path)
@@ -342,7 +344,8 @@ def generate_dir(source_dir,dest_dir):
             os.mkdir(new_dest)
             generate_dir(f_path,new_dest)
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path,base_path):
+    full_dest_dir_path = os.path.join(base_path, dest_dir_path)
     if not os.path.exists(dir_path_content):
         raise Exception("Content directory does not exist")
     for f in os.listdir(dir_path_content):
@@ -353,5 +356,5 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
             generate_page(f_source_path, template_path, f_dest_path)
         elif os.path.isdir(f_source_path):
             os.makedirs(f_dest_path, exist_ok=True)
-            generate_pages_recursive(f_source_path,template_path,f_dest_path)
+            generate_pages_recursive(f_source_path,template_path,f_dest_path,full_dest_dir_path)
 

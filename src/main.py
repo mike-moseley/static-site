@@ -3,14 +3,16 @@ from textnode import TextNode, TextType
 from tools import markdown_to_html_node, generate_dir, generate_page, generate_pages_recursive
 import shutil
 import os
+import sys
 
 
 def main():
-    if os.path.exists("public/"):
-        shutil.rmtree("public/")
-    os.mkdir("public/")
-    generate_dir("static/", "public/")
-    generate_pages_recursive("content/","template.html","public/")
+    basepath = sys.argv[1]
+    if os.path.exists("docs/"):
+        shutil.rmtree("docs/")
+    os.mkdir("docs/")
+    generate_dir("static/", "docs/")
+    generate_pages_recursive("content/","template.html","docs/",basepath)
 
 
 main()
