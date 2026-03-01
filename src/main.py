@@ -15,7 +15,7 @@ def main():
     if not base_path.startswith('/'):
         base_path = '/'+base_path
     if not base_path.endswith('/'):
-        base_path = '/'+base_path
+        base_path = base_path + '/'
 
     if os.path.exists("docs/"):
         shutil.rmtree("docs/")
