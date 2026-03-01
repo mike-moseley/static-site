@@ -7,12 +7,12 @@ import sys
 
 
 def main():
-    basepath = sys.argv[1]
+    base_path = sys.argv[1]
     if os.path.exists("docs/"):
         shutil.rmtree("docs/")
     os.mkdir("docs/")
     generate_dir("static/", "docs/")
-    generate_pages_recursive("content/","template.html","docs/",basepath)
+    generate_pages_recursive("content/","template.html","docs/",base_path)
 
 
 main()
